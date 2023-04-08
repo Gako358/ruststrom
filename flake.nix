@@ -3,6 +3,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     naersk.url = "github:nix-community/naersk";
+    maelstrom-src = {
+      url = "https://github.com/jepsen-io/maelstrom/releases/download/v0.2.3/maelstrom.tar.bz2";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -10,6 +14,7 @@
     nixpkgs,
     flake-utils,
     naersk,
+    maelstrom-src,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
@@ -18,16 +23,41 @@
         };
         naersk-lib = pkgs.callPackage naersk {};
       in {
-        devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            cargo
-            rustc
-            rustfmt
-            pre-commit
-            rustPackages.clippy
-            pkg-config
-          ];
+        packages = {
+          maelstrom = pkgs.stdenv.mkDerivation {
+            name = "maelstrom";
+            src = maelstrom-src;
+            buildInputs = with pkgs; [bzip2];
+
+            unpackPhase = ''
+              tar -xjf $src
+            '';
+
+            installPhase = ''
+              mkdir -p $out/bin
+              cp maelstrom $out/bin/maelstrom
+              chmod +x $out/bin/maelstrom
+            '';
+          };
         };
+        devShell = let
+          maltest = pkgs.writeShellScriptBin "maltest" ''
+            maelstrom test -w echo --bin ./target/debug/maelstrom --node-count 1 --time-limit 10
+          '';
+        in
+          pkgs.mkShell {
+            name = "maelstrom-dev";
+            buildInputs = with pkgs; [
+              cargo
+              rustc
+              rustfmt
+              pre-commit
+              rustPackages.clippy
+              pkg-config
+              maelstrom
+              maltest
+            ];
+          };
       }
     );
 }

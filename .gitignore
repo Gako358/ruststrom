@@ -13,3 +13,8 @@ Cargo.lock
 # Nix
 result
 .direnv
+
+
+# Added by cargo
+
+/target
