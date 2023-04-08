@@ -4,7 +4,7 @@ Our first challenge is more of a "getting started" guide" to get the hang of wor
 
 ## Specification
 
-n this challenge, your node will receive an "echo" message from Maelstrom that looks like this:
+In this challenge, your node will receive an "echo" message from Maelstrom that looks like this:
 ```
 {
   "src": "c1",
