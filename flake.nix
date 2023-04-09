@@ -42,7 +42,7 @@
         };
         devShell = let
           maltest = pkgs.writeShellScriptBin "maltest" ''
-            maelstrom test -w echo --bin ./target/debug/maelstrom --node-count 1 --time-limit 10
+            maelstrom test -windowed echo --bin ./target/debug/echo --node-count 1 --time-limit 10
           '';
         in
           pkgs.mkShell {
